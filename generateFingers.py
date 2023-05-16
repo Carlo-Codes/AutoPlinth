@@ -23,15 +23,16 @@ class Generatefingers:
         edgesLength = {}
         for curve in intersectionEdges:
             edgesLength[curve] = rs.CurveLength(curve)
-        sortedEdgeLength = sorted(edgesLength)
-        point1 = rs.CurveMidPoint(sortedEdgeLength[-4])
-        point2 = rs.CurveMidPoint(sortedEdgeLength[-3])
-        point3 = rs.CurveMidPoint(sortedEdgeLength[-2])
-        point4 = rs.CurveMidPoint(sortedEdgeLength[-1])
+        sortedEdgeLength = sorted(edgesLength.items(), key=operator.itemgetter(1))
+        print(sortedEdgeLength)
+        point1 = rs.CurveMidPoint(sortedEdgeLength[-4][0])
+        point2 = rs.CurveMidPoint(sortedEdgeLength[-3][0])
+        point3 = rs.CurveMidPoint(sortedEdgeLength[-2][0])
+        point4 = rs.CurveMidPoint(sortedEdgeLength[-1][0])
     
         crossSectionpoints = [point1,point2,point3,point4]
-        print(sortedEdgeLength)
-        crossSectionCurve = rs.AddPolyline(crossSectionpoints)
+        print(crossSectionpoints)
+        crossSectionCurve = rs.AddPolyline(crossSectionpoints+[crossSectionpoints[0]])
         rs.DeleteObjects([intersectionEdges])
 
                   
