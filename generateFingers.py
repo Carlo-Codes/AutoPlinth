@@ -32,7 +32,7 @@ class Generatefingers:
         sortedEdgeLength = sorted(edgesLength.items(), key=operator.itemgetter(1))
         edge1 = sortedEdgeLength[-1][0]
         point1 = rs.CurveMidPoint(sortedEdgeLength[-1][0])
-
+        
 
 
         #intersectionEdges =  rs.DuplicateEdgeCurves(intersection)
