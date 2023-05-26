@@ -31,29 +31,30 @@ class Generatefingers:
 
         sortedEdgeLength = sorted(edgesLength.items(), key=operator.itemgetter(1))
         edge1 = sortedEdgeLength[-1][0]
-        point1 = rs.CurveMidPoint(sortedEdgeLength[-1][0])
-        
+        edge2 = sortedEdgeLength[-2][0]
+        edge3 = sortedEdgeLength[-3][0]
+        edge4 = sortedEdgeLength[-4][0]
+        point1 = rs.CurveMidPoint(edge1)
+        point2 = rs.CurveMidPoint(edge2)
+        point3 = rs.CurveMidPoint(edge3)
+        point4 = rs.CurveMidPoint(edge4)
 
 
-        #intersectionEdges =  rs.DuplicateEdgeCurves(intersection)
-        #if len(intersectionEdges) > 12:
-            #rs.MessageBox("One of the intersections isnt a cuboid", buttons=0, title="Error")
-            #pass
-        #edgesLength = {}
-        #for curve in intersectionEdges:
-        #    edgesLength[curve] = rs.CurveLength(curve)
-        #sortedEdgeLength = sorted(edgesLength.items(), key=operator.itemgetter(1))
-        
-       #point1 = rs.CurveMidPoint(sortedEdgeLength[-4][0])
-        #point2 = rs.CurveMidPoint(sortedEdgeLength[-3][0])
-        #point3 = rs.CurveMidPoint(sortedEdgeLength[-2][0])
-        #point4 = rs.CurveMidPoint(sortedEdgeLength[-1][0])
-    
-        #crossSectionpoints = [point1,point2,point3,point4]
-        
-        #crossSectionsrf= rs.AddSrfPtGrid([2,2],crossSectionpoints)
-        #rs.DeleteObjects(intersectionEdges)
+        crossSections = rs.AddSrfPt([point1,point2, point3, point4])
 
+        self.fingerCrossSection = crossSections
+
+        toDelete = surfaces + intersectionEdges
+        rs.DeleteObjects(toDelete)
+
+    def sortPointsAroundSquare(self, points):
+        for i in range(len(points)):
+            for j in range(len(points)):
+                if i != j:
+                    ##start here. need ot make an algo rythm that checks distance of each point against every othe rpoint, store it in a list of objects that store optionss
+
+
+        
                   
 
     def makeFinger(self):
