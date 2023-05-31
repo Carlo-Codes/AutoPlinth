@@ -1,5 +1,6 @@
 import rhinoscriptsyntax as rs
 import operator
+import copy
 
 class Generatefingers:
     def __init__(self, topOrBottom, sides):
@@ -47,13 +48,8 @@ class Generatefingers:
         toDelete = surfaces + intersectionEdges
         rs.DeleteObjects(toDelete)
 
-    def sortPointsAroundSquare(self, points):
-        for i in range(len(points)):
-            for j in range(len(points)):
-                if i != j:
-                    ##start here. need ot make an algo rythm that checks distance of each point against every othe rpoint, store it in a list of objects that store optionss
 
-
+         
         
                   
 
