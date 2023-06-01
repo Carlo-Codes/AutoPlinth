@@ -5,6 +5,7 @@ import sortPointsByDistance
 
 class Generatefingers:
     def __init__(self, topOrBottom, sides):
+        self.fingerCrossSection = {}
         self.splitOutIntersections(topOrBottom,sides)
         for intersection in self.splitIntersections:
             self.makeFingerCrossSection(intersection)
@@ -41,16 +42,25 @@ class Generatefingers:
         point3 = rs.CurveMidPoint(edge3)
         point4 = rs.CurveMidPoint(edge4)
 
+        ##sorting points
         unsortedPoints = [point1,point2, point3, point4]
 
         sortedPoints = sortPointsByDistance.sortPointsByDistance(unsortedPoints[0],unsortedPoints)
-
-
+        
+        ##crosssection
         crossSections = rs.AddSrfPt(sortedPoints)
         
-        self.fingerCrossSection = crossSections
+        self.fingerCrossSection[crossSections] = sortedEdgeLength[-1][0] #edge to keep
 
-        toDelete = surfaces + intersectionEdges + [intersection]
+        ##edges to delete
+        edgesToDelete=[]
+
+        for i in range(len(sortedEdgeLength)):
+            if sortedEdgeLength[i] != sortedEdgeLength[-1]:
+                edgesToDelete.append(sortedEdgeLength[i][0])
+        ###
+
+        toDelete = surfaces + edgesToDelete + [intersection]
         rs.DeleteObjects(toDelete)
 
 
@@ -62,4 +72,7 @@ class Generatefingers:
         pass
 
     def arrayFingers(self):
+        pass
+
+    def generateFingerArray(self):
         pass
