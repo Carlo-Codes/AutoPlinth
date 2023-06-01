@@ -1,7 +1,7 @@
 import rhinoscriptsyntax as rs
 import operator
 
-def sortPointsAroundSquare(point1, points, sortedPoints = None):
+def sortPointsByDistance(point1, points, sortedPoints = None):
     if sortedPoints == None:
         sortedPoints = []
         sortedPoints.append(points[0])
@@ -27,13 +27,13 @@ def sortPointsAroundSquare(point1, points, sortedPoints = None):
     sortedPoints.append(closestPoint)
     points.remove(closestPoint)
     
-    sortPointsAroundSquare(closestPoint, points, sortedPoints)
+    sortPointsByDistance(closestPoint, points, sortedPoints)
     return sortedPoints
 
-points = rs.GetObjects("sel Points", 1)
+# points = rs.GetObjects("sel Points", 1)
 
-sortedPoints = sortPointsAroundSquare(points[0], points)
-print(len(sortedPoints))
+# sortedPoints = sortPointsByDistance(points[0], points)
+# print(len(sortedPoints))
 
-rs.AddPolyline(sortedPoints)
+# rs.AddPolyline(sortedPoints+[sortedPoints[0]])
 

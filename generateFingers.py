@@ -1,6 +1,7 @@
 import rhinoscriptsyntax as rs
 import operator
 import copy
+import sortPointsByDistance
 
 class Generatefingers:
     def __init__(self, topOrBottom, sides):
@@ -40,12 +41,16 @@ class Generatefingers:
         point3 = rs.CurveMidPoint(edge3)
         point4 = rs.CurveMidPoint(edge4)
 
+        unsortedPoints = [point1,point2, point3, point4]
 
-        crossSections = rs.AddSrfPt([point1,point2, point3, point4])
+        sortedPoints = sortPointsByDistance.sortPointsByDistance(unsortedPoints[0],unsortedPoints)
 
+
+        crossSections = rs.AddSrfPt(sortedPoints)
+        
         self.fingerCrossSection = crossSections
 
-        toDelete = surfaces + intersectionEdges
+        toDelete = surfaces + intersectionEdges + [intersection]
         rs.DeleteObjects(toDelete)
 
 
