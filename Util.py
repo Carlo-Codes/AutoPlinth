@@ -37,3 +37,19 @@ def sortPointsByDistance(point1, points, sortedPoints = None):
 
 # rs.AddPolyline(sortedPoints+[sortedPoints[0]])
 
+def trimCurveFromBothSides(crv, trimAmount):
+    
+    originalLength = rs.CurveLength(crv)
+    edgeDomain = trimAmount/originalLength
+    domain = rs.CurveDomain(crv)
+    
+    domain[0] = edgeDomain * domain[0] ## i think this isnt trimming the curve right (i know)
+    domain[1] = (1 - edgeDomain) * domain[1]
+    newCurve = rs.TrimCurve(crv, domain)
+    return newCurve
+
+
+# crv = rs.GetObject("crv")
+
+# trimCurveFromBothSides(crv, 20)
+

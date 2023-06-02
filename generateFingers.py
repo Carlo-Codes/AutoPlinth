@@ -1,16 +1,20 @@
 import rhinoscriptsyntax as rs
 import operator
 import copy
-import sortPointsByDistance
+import Util
 import System
+from Util import trimCurveFromBothSides
+
+
 
 class Generatefingers:
-    def __init__(self, topOrBottom, sides, sheetThickness, fingerTolerance):
+    def __init__(self, topOrBottom, sides, sheetThickness, fingerTolerance, edgeOffset,minFingLen):
         self.fingerCrossSections = {}
+        self.fingers = {} #fingers and he curve they're on
         self.splitOutIntersections(topOrBottom,sides)
         for intersection in self.splitIntersections:
             self.makefingerCrossSections(intersection)
-        self.generateFingerArray(self.fingerCrossSections,100)
+        self.generateFingerArray(self.fingerCrossSections,minFingLen,edgeOffset)
         
             
     
@@ -48,7 +52,7 @@ class Generatefingers:
         ##sorting points
         unsortedPoints = [point1,point2, point3, point4]
 
-        sortedPoints = sortPointsByDistance.sortPointsByDistance(unsortedPoints[0],unsortedPoints)
+        sortedPoints = Util.sortPointsByDistance(unsortedPoints[0],unsortedPoints)
         
         ##crosssection
         crossSection = rs.AddPolyline(sortedPoints+[sortedPoints[0]])
@@ -104,22 +108,47 @@ class Generatefingers:
         extrusionEndPoint = rs.CopyObject(midpoint, scaledMovementVectR)
         finger = rs.ExtrudeCurveStraight(crossSection, extrusionStartPoint,extrusionEndPoint)
         rs.CapPlanarHoles(finger)
+        rs.DeleteObjects([extrusionStartPoint,extrusionEndPoint])
+        return finger
         
+
+    def arrayFingers(self, finger, crv, n, edgeOffset = 0):
+        newcrv = trimCurveFromBothSides(crv, edgeOffset)
+        divisionPts = rs.DivideCurve(crv, n , create_points=True, return_points=True)
+        centrePt = rs.CurveMidPoint(newcrv)
+        fingers = []
+
+        for pt in divisionPts[1:-1]:
+            movementVector = rs.VectorCreate(pt, centrePt)
+            fingerToAdd = rs.CopyObject(finger, movementVector)
+            fingers.append(fingerToAdd)
         
+        rs.DeleteObjects([finger, crv])
+        
+        return fingers
 
-                 
 
-
-    def arrayFingers(self):
-        pass
-
-    def generateFingerArray(self,  crossSectionDict, multiFingerThreashold):
+    def generateFingerArray(self,  crossSectionDict, minimumFingerLength, edgeOffset):
         for key, value in crossSectionDict.items():
-            #  nFingers = 1
-            #  midpoint = rs.CurveMidPoint(value)
-            #  curveLength = rs.CurveLength(value)
-            #  if curveLength > multiFingerThreashold:
-            #      pass
-            #  else:
-            #      pass
-            self.makeFinger(key,value,50)
+             nFingers = 1
+             midpoint = rs.CurveMidPoint(value)
+             curveLength = rs.CurveLength(value)
+
+             if curveLength / 2 < minimumFingerLength:
+                 finger = self.makeFinger(key,value,minimumFingerLength)
+
+             elif curveLength / 3 < minimumFingerLength:
+                 fingerlength = curveLength / 3
+                 finger = self.makeFinger(key,value,fingerlength)
+                 fingers = self.arrayFingers(finger,value,2,edgeOffset)
+                 
+             elif curveLength / 4 < minimumFingerLength:
+                 fingerlength = curveLength / 4
+                 finger = self.makeFinger(key,value,fingerlength)
+                 fingers = self.arrayFingers(finger,value,3,edgeOffset)
+                 
+             else:
+                fingerlength = curveLength / 5
+                finger = self.makeFinger(key,value,fingerlength)
+                fingers = self.arrayFingers(finger,value,4,edgeOffset)
+            
