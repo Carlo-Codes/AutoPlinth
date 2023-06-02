@@ -10,8 +10,8 @@ class Generatefingers:
         self.splitOutIntersections(topOrBottom,sides)
         for intersection in self.splitIntersections:
             self.makefingerCrossSections(intersection)
+        self.generateFingerArray(self.fingerCrossSections,100)
         
-        self.moveCrossSectionToStart(self.fingerCrossSections, sheetThickness, fingerTolerance)
             
     
     def splitOutIntersections(self, topOrBottom, sides):
@@ -51,7 +51,7 @@ class Generatefingers:
         sortedPoints = sortPointsByDistance.sortPointsByDistance(unsortedPoints[0],unsortedPoints)
         
         ##crosssection
-        crossSection = rs.AddSrfPt(sortedPoints)
+        crossSection = rs.AddPolyline(sortedPoints+[sortedPoints[0]])
         self.fingerCrossSections [crossSection] = sortedEdgeLength[-1][0] #edge to keep
         
         ##edges to delete
@@ -85,11 +85,41 @@ class Generatefingers:
         
                   
 
-    def makeFinger(self):
-        pass
+    def makeFinger(self, crossSection, crv, etrusionLength):
+        midpoint = rs.CurveMidPoint(crv)
+        endpont = rs.CurveEndPoint(crv)
+        startPoint = rs.CurveStartPoint(crv)
+        curveLength = rs.CurveLength(crv)
+
+        extrusionVectL = rs.VectorCreate(endpont, midpoint)
+        extrusionVectR = rs.VectorCreate(startPoint, midpoint)
+
+        vectorScaleFactor = etrusionLength / curveLength
+
+        scaledMovementVectL = rs.VectorScale(extrusionVectL, vectorScaleFactor)
+        scaledMovementVectR = rs.VectorScale(extrusionVectR, vectorScaleFactor)
+
+        rs.MoveObject(crossSection,scaledMovementVectL)
+        extrusionStartPoint = rs.CopyObject(midpoint,scaledMovementVectL)
+        extrusionEndPoint = rs.CopyObject(midpoint, scaledMovementVectR)
+        finger = rs.ExtrudeCurveStraight(crossSection, extrusionStartPoint,extrusionEndPoint)
+        rs.CapPlanarHoles(finger)
+        
+        
+
+                 
+
 
     def arrayFingers(self):
         pass
 
-    def generateFingerArray(self):
-        pass
+    def generateFingerArray(self,  crossSectionDict, multiFingerThreashold):
+        for key, value in crossSectionDict.items():
+            #  nFingers = 1
+            #  midpoint = rs.CurveMidPoint(value)
+            #  curveLength = rs.CurveLength(value)
+            #  if curveLength > multiFingerThreashold:
+            #      pass
+            #  else:
+            #      pass
+            self.makeFinger(key,value,50)
