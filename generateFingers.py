@@ -2,13 +2,16 @@ import rhinoscriptsyntax as rs
 import operator
 import copy
 import sortPointsByDistance
+import System
 
 class Generatefingers:
-    def __init__(self, topOrBottom, sides):
-        self.fingerCrossSection = {}
+    def __init__(self, topOrBottom, sides, sheetThickness, fingerTolerance):
+        self.fingerCrossSections = {}
         self.splitOutIntersections(topOrBottom,sides)
         for intersection in self.splitIntersections:
-            self.makeFingerCrossSection(intersection)
+            self.makefingerCrossSections(intersection)
+        
+        self.moveCrossSectionToStart(self.fingerCrossSections, sheetThickness, fingerTolerance)
             
     
     def splitOutIntersections(self, topOrBottom, sides):
@@ -18,7 +21,7 @@ class Generatefingers:
             self.splitIntersections += rs.BooleanIntersection (intersection, side, delete_input= False)
         rs.DeleteObjects(intersection)
 
-    def makeFingerCrossSection(self, intersection):
+    def makefingerCrossSections(self, intersection):
         surfaces = rs.ExplodePolysurfaces(intersection)
         surfaceArea = {}
         for surface in surfaces:
@@ -48,23 +51,37 @@ class Generatefingers:
         sortedPoints = sortPointsByDistance.sortPointsByDistance(unsortedPoints[0],unsortedPoints)
         
         ##crosssection
-        crossSections = rs.AddSrfPt(sortedPoints)
+        crossSection = rs.AddSrfPt(sortedPoints)
+        self.fingerCrossSections [crossSection] = sortedEdgeLength[-1][0] #edge to keep
         
-        self.fingerCrossSection[crossSections] = sortedEdgeLength[-1][0] #edge to keep
-
         ##edges to delete
         edgesToDelete=[]
-
         for i in range(len(sortedEdgeLength)):
             if sortedEdgeLength[i] != sortedEdgeLength[-1]:
                 edgesToDelete.append(sortedEdgeLength[i][0])
         ###
-
+        
         toDelete = surfaces + edgesToDelete + [intersection]
         rs.DeleteObjects(toDelete)
+        
 
+    def moveCrossSectionToStart(self, crossSectionDict, sheetThickness, fingerEdgeTolerance):
+        
+        for key, value in crossSectionDict.items():
+            
+            midpoint = rs.CurveMidPoint(value)
+            endpont = rs.CurveEndPoint(value)
+            startPoint = rs.CurveStartPoint(value)
+            curveLength = rs.CurveLength(value)
 
-         
+            neededVectorLength = curveLength - ((sheetThickness + fingerEdgeTolerance)*2)
+            vectorScaleFactor = neededVectorLength / curveLength
+        
+            movementVect = rs.VectorCreate(endpont, midpoint)
+            scaledMovementVect = rs.VectorScale(movementVect, vectorScaleFactor)
+
+            rs.MoveObject(key, scaledMovementVect)
+           
         
                   
 
